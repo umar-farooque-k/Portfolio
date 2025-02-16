@@ -1,0 +1,96 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&display=swap');
+
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+
+body {
+    background-color: #0d0d0d;
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 50px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.container a {
+    text-decoration: none;
+    color: white;
+}
+.card {
+    background: #181818;
+    border: 2px solid #fff;
+    width: 20vw;
+    min-width: 250px;
+    max-width: 300px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    padding-bottom: 15px;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.photo img {
+    width: 100%;
+    height: auto;
+    border-bottom: 2px solid #fff;
+}
+
+h4 {
+    font-size: 20px;
+    margin: 15px 0;
+}
+
+p {
+    font-size: 14px;
+    margin: 10px 0;
+    color: #aaa;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        max-width: 390px; /* Match mobile width */
+        margin: 0 auto;  /* Center horizontally */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Ensure content is centered */
+        justify-content: center;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+        max-width: 390px; /* Match mobile width */
+        margin: 0 auto;  /* Center horizontally */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Ensure content is centered */
+        justify-content: center;
+    }
+    
+}

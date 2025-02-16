@@ -1,0 +1,51 @@
+/* Specific styles for Skills page */
+body{
+    background-color: #0d0d0d;
+  }
+  .skills-container {
+      text-align: center;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 50px 20px;
+    }
+    
+    .skills-container h1 {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+    
+    .skills-container h2 {
+      font-size: 2rem;
+      margin-top: 50px;
+    }
+    
+    .skills, .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 20px;
+      justify-items: center;
+      margin-top: 20px;
+    }
+    
+    .skill, .tool {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border-radius: 10px;
+      width: 120px;
+      height: 120px;
+      transition: transform 0.3s ease-in-out, background 0.3s ease;
+    }
+    
+    .skill i, .tool i {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .skill span, .tool span {
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+    }
+    
