@@ -1,125 +1,142 @@
-const API_URL = 'https://api.jsonbin.io/v3/b/67b1b6b5e41b4d34e48ff797'; // Replace with your actual API URL
-const API_KEY = '$2a$10$HhKEXe09/Hmecf0DDga7Hequ15tn2PgfVuEMSJ4cmjDjDbeEd7ipi'; // Replace with your JSONBin API key
-const ACCESS_KEY = '$2a$10$nYWjCTX7sDdqPqpBgGEIh.ykGcztMMu/bwsQPNZXY/JucQI4gTyI6';
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Toggle password input when clicking "ADD"
-function togglePasswordAccess() {
-    document.getElementById('password-access').style.display = 'block';
-}
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "portfolio-5c023.firebaseapp.com",
+    projectId: "portfolio-5c023",
+    storageBucket: "portfolio-5c023.appspot.com",
+    messagingSenderId: "714065630728",
+    appId: "1:714065630728:web:49181c38a41db85e9923bd",
+};
 
-// Show form if password is correct
-function showForm() {
-    const password = document.getElementById('password-input').value;
-    const correctPassword = 'cr7'; // Change this if needed
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    if (password === correctPassword) {
-        document.getElementById('project-form').style.display = 'block';
-        document.getElementById('password-access').style.display = 'none';
-    } else {
-        alert('Incorrect password!');
-    }
-}
+// Admin password
+const ADMIN_PASSWORD = "cr7";
 
-// Fetch projects from JSONBin
-async function fetchProjects() {
-    try {
-        let response = await fetch(API_URL, {
-            headers: { 'X-Master-Key': API_KEY }
-        });
-        let data = await response.json();
-        return data.record || [];
-    } catch (error) {
-        console.error('Error fetching projects:', error);
-        return [];
-    }
-}
+// Ensure DOM is loaded before executing
+document.addEventListener("DOMContentLoaded", () => {
+    const addProjectBtn = document.getElementById("add-project-btn");
+    const passwordAccessDiv = document.getElementById("password-access");
+    const passwordSubmitBtn = document.getElementById("password-submit");
+    const projectForm = document.getElementById("project-form");
+    const addProjectForm = document.getElementById("addProjectForm");
 
-// Display projects on the page
-async function displayProjects() {
-    const projectList = document.getElementById('project-list');
-    projectList.innerHTML = '';
+    // Hide form & password box initially
+    projectForm.style.display = "none";
+    passwordAccessDiv.style.display = "none";
 
-    let projects = await fetchProjects();
-
-    projects.forEach((project, index) => {
-        const projectElement = document.createElement('div');
-        projectElement.classList.add('project-item');
-        projectElement.innerHTML = `
-            <h3>${project.name}</h3>
-            <img src="${project.image}" alt="${project.name}" class="project-image">
-            <p>${project.description}</p><br>
-            <p><strong>Tech Used:</strong> ${project.tech}</p><br>
-            <a href="${project.github}" target="_blank">GitHub</a> | 
-            <a href="${project.live}" target="_blank">Live Demo</a><br><br>
-            <button class="delete-btn" onclick="promptDeleteProject(${index})">Delete</button>
-        `;
-        projectList.appendChild(projectElement);
+    // Show password input when "Add" button is clicked
+    addProjectBtn.addEventListener("click", () => {
+        passwordAccessDiv.style.display = "block";
     });
-}
 
-// Handle project submission
-document.getElementById('addProjectForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
+    // Validate password before showing the form
+    passwordSubmitBtn.addEventListener("click", () => {
+        const password = document.getElementById("password-input").value.trim();
+        if (password === ADMIN_PASSWORD) {
+            projectForm.style.display = "block"; // Show the form
+            passwordAccessDiv.style.display = "none"; // Hide password input
+        } else {
+            alert("❌ Incorrect password!");
+        }
+    });
 
-    const project = {
-        name: document.getElementById('project-name').value,
-        description: document.getElementById('project-description').value,
-        image: document.getElementById('project-image').value,
-        tech: document.getElementById('project-tech').value,
-        github: document.getElementById('project-github').value,
-        live: document.getElementById('project-live').value
-    };
-
-    let projects = await fetchProjects();
-    projects.push(project);
-
-    try {
-        await fetch(API_URL, {
-            method: 'PUT', 
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(projects)
-        });
-
-        displayProjects();
-        document.getElementById('addProjectForm').reset();
-    } catch (error) {
-        console.error('Error adding project:', error);
-    }
+    // Handle project submission
+    addProjectForm.addEventListener("submit", addProject);
+    displayProjects();
 });
 
-// Prompt for password before deleting project
-function promptDeleteProject(index) {
-    const password = prompt('Enter password to delete this project:');
-    if (password === 'cr7') {
-        deleteProject(index);
-    } else {
-        alert('Incorrect password!');
+// Display projects from Firestore
+async function displayProjects() {
+    const projectList = document.getElementById("project-list");
+    projectList.innerHTML = "<p>Loading projects...</p>";
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        projectList.innerHTML = "";
+
+        querySnapshot.forEach(docSnapshot => {
+            const project = docSnapshot.data();
+            const projectId = docSnapshot.id;
+
+            projectList.innerHTML += `
+                <div class="project-item">
+                    <h3>${project.name}</h3>
+                    <p>${project.description}</p>
+                    ${project.image ? `<img src="${project.image}" class="project-image" alt="Project Image">` : ""}
+                    <p><b>Technologies:</b> ${project.tech || "Not specified"}</p>
+                    <p>
+                        ${project.github ? `<a href="${project.github}" target="_blank">GitHub</a> | ` : ""}
+                        ${project.live ? `<a href="${project.live}" target="_blank">Live Demo</a>` : ""}
+                    </p>
+                    <button class="delete-btn" onclick="confirmDelete('${projectId}')">Delete</button>
+                </div>
+            `;
+        });
+
+        if (querySnapshot.empty) {
+            projectList.innerHTML = "<p>No projects found.</p>";
+        }
+    } catch (error) {
+        console.error("Error fetching projects:", error);
+        projectList.innerHTML = "<p>⚠️ Failed to load projects.</p>";
     }
 }
 
-// Delete a project
-async function deleteProject(index) {
-    let projects = await fetchProjects();
-    projects.splice(index, 1);
+// Add a new project to Firestore
+async function addProject(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("project-name").value.trim();
+    const description = document.getElementById("project-description").value.trim();
+    const image = document.getElementById("project-image").value.trim();
+    const tech = document.getElementById("project-tech").value.trim();
+    const github = document.getElementById("project-github").value.trim();
+    const live = document.getElementById("project-live").value.trim();
+
+    if (!name || !description) {
+        alert("⚠️ Project name and description are required!");
+        return;
+    }
 
     try {
-        await fetch(API_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(projects)
-        });
+        await addDoc(collection(db, "projects"), { name, description, image, tech, github, live });
+        alert("✅ Project added successfully!");
+        
+        document.getElementById("addProjectForm").reset();
+        document.getElementById("project-form").style.display = "none"; // Hide form after submission
 
         displayProjects();
     } catch (error) {
-        console.error('Error deleting project:', error);
+        console.error("Error adding project:", error);
+        alert("❌ Failed to add project.");
     }
 }
 
-// Load projects when the page loads
-window.onload = displayProjects;
+// Ask for password before deleting a project
+window.confirmDelete = function (projectId) {
+    const password = prompt("🔑 Enter Admin Password to Delete:");
+    if (password === ADMIN_PASSWORD) {
+        deleteProject(projectId);
+    } else {
+        alert("❌ Incorrect password! Deletion canceled.");
+    }
+};
+
+// Delete a project from Firestore
+async function deleteProject(projectId) {
+    try {
+        await deleteDoc(doc(db, "projects", projectId));
+        alert("🗑️ Project deleted successfully!");
+        displayProjects();
+    } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("❌ Failed to delete project.");
+    }
+};
