@@ -75,7 +75,7 @@ async function displayProjects() {
                         ${project.github ? `<a href="${project.github}" target="_blank">GitHub</a> | ` : ""}
                         ${project.live ? `<a href="${project.live}" target="_blank">Live Demo</a>` : ""}
                     </p>
-                    <button class="delete-btn" onclick="confirmDelete('${projectId}')">Delete</button>
+                    <button class="delete-btn" onclick="confirmDelete('${projectId}')">X</button>
                 </div>
             `;
         });
